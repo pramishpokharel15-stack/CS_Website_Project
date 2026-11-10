@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Harry Potter Trivia</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="nav-wrap">
+        <a class="brand" href="index.html">Harry Potter</a>
+        <nav class="nav-links" aria-label="Main navigation">
+          <a href="index.html">Home</a>
+          <a href="trivia.html" class="active">Trivia</a>
+          <a href="game.html">Game</a>
+        </nav>
+      </div>
+    </header>
+    <main class="page-shell">
+      <div class="page-header">
+        <div class="eyebrow">Take a breather</div>
+        <h1 class="page-title">Wizarding Trivia</h1>
+        <p>Pick a difficulty and test your knowledge. Turn on the original, gentle lo-fi loop for a calmer quiz.</p>
+        <button id="musicToggle" class="btn btn-secondary" type="button" aria-pressed="false">Play chill music</button>
+      </div>
+      <div class="game-shell">
+        <section class="quiz-panel" id="easyQuiz">
+          <h3>Easy Difficulty</h3>
+          <p>Five questions based on the story facts on the home page.</p>
+          <div id="easyQuestion" class="quiz-question" aria-live="polite">Press start to begin.</div>
+          <div id="easyOptions" class="answer-grid"></div>
+          <div class="quiz-meta"><span id="easyScore">Score: 0/5</span><button id="easyStart" class="btn btn-primary" type="button">Start Easy Quiz</button></div>
+          <div id="easyWrong" class="quiz-wrong" aria-live="polite"></div>
+        </section>
+        <section class="quiz-panel" id="hardQuiz">
+          <h3>Hard Difficulty</h3>
+          <p>Ten questions about the wider wizarding world.</p>
+          <div id="hardQuestion" class="quiz-question" aria-live="polite">Press start to begin.</div>
+          <div id="hardOptions" class="answer-grid"></div>
+          <div class="quiz-meta"><span id="hardScore">Score: 0/10</span><button id="hardStart" class="btn btn-primary" type="button">Start Hard Quiz</button></div>
+          <div id="hardWrong" class="quiz-wrong" aria-live="polite"></div>
+        </section>
+      </div>
+    </main>
+    <script src="scripts.js"></script>
+  </body>
+</html>

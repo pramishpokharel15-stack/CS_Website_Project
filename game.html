@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Harry Potter Survival Game</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body class="game-page">
+    <header class="site-header game-header">
+      <div class="nav-wrap">
+        <a class="brand" href="index.html">Harry Potter</a>
+        <nav class="nav-links" aria-label="Main navigation">
+          <a href="index.html">Home</a><a href="trivia.html">Trivia</a><a href="game.html" class="active">Game</a>
+        </nav>
+      </div>
+    </header>
+    <main class="game-screen">
+      <section id="arena" class="arena" aria-label="Survival battle arena">
+        <canvas id="battleCanvas" aria-label="Use arrow keys or WASD to dodge attacks"></canvas>
+        <div class="game-topbar">
+          <div><strong id="stageLabel">Stage 1 / 5</strong><span id="phaseLabel">The castle is quiet</span></div>
+          <div class="health-track" aria-label="Health"><span id="healthBar"></span></div>
+          <strong id="healthLabel">100 HP</strong>
+          <button id="soundToggle" class="game-button">Sound: off</button>
+          <button id="shopToggle" class="game-button">Spell shop</button>
+          <button id="pauseButton" class="game-button">Pause</button>
+        </div>
+        <div class="game-bottom">
+          <div id="spellBar" class="spell-bar" aria-label="Unlocked spells"></div>
+          <p>Move: WASD / arrows · Spell: 1–6 · Pause: P</p>
+        </div>
+        <section id="shopPanel" class="overlay-panel shop-panel" hidden>
+          <div class="overlay-card">
+            <button id="closeShop" class="overlay-close" aria-label="Close shop">×</button>
+            <h2>Spell Shop</h2>
+            <p>Collect spell tokens when attacks pass out of the arena. Each spell costs 50 matching tokens.</p>
+            <div id="tokenCount" class="token-count"></div>
+            <div id="shopItems" class="shop-items"></div>
+          </div>
+        </section>
+        <section id="pausePanel" class="overlay-panel" hidden>
+          <div class="overlay-card">
+            <h2>Battle Paused</h2><p>The battle pauses when you leave this tab.</p>
+            <button id="resumeButton" class="btn btn-primary">Resume</button>
+          </div>
+        </section>
+        <section id="endPanel" class="overlay-panel" hidden>
+          <div class="overlay-card">
+            <h2 id="endTitle">You Win!</h2><p id="endMessage">You survived the five stages.</p>
+            <button id="retryButton" class="btn btn-primary">Play Again</button>
+          </div>
+        </section>
+      </section>
+    </main>
+    <script src="scripts.js"></script>
+  </body>
+</html>

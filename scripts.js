@@ -1,538 +1,533 @@
 document.addEventListener('DOMContentLoaded', () => {
-  const path = window.location.pathname.split('/').pop() || 'index.html';
-  const navLinks = document.querySelectorAll('.nav-links a');
-
-  navLinks.forEach((link) => {
-    const href = link.getAttribute('href');
-    if (href === path || (path === '' && href === 'index.html')) {
-      link.classList.add('active');
-    }
+  const activePage = location.pathname.split('/').pop() || 'index.html';
+  document.querySelectorAll('.nav-links a').forEach((link) => {
+    if (link.getAttribute('href') === activePage) link.classList.add('active');
   });
-
-  const yearNode = document.querySelector('[data-year]');
-  if (yearNode) {
-    yearNode.textContent = new Date().getFullYear();
-  }
-
+  document.querySelectorAll('[data-year]').forEach((node) => {
+    node.textContent = new Date().getFullYear();
+  });
   setupTrivia();
-  setupBattleGame();
+  setupMusic();
+  setupBattle();
 });
 
 function setupTrivia() {
-  const easyQuestions = [
-    {
-      question: 'What is the name of the wizarding school Harry attends?',
-      options: ['Beauxbatons', 'Hogwarts', 'Durmstrang', 'Ilvermorny'],
-      answer: 'Hogwarts'
-    },
-    {
-      question: 'Who is Harry Potter\'s best friend and fellow Gryffindor?',
-      options: ['Cedric Diggory', 'Hermione Granger', 'Luna Lovegood', 'Draco Malfoy'],
-      answer: 'Hermione Granger'
-    },
-    {
-      question: 'What magical creature guards the entrance to the Sorcerer\'s Stone?',
-      options: ['Dragon', 'Fluffy the three-headed dog', 'Basilisk', 'Thestral'],
-      answer: 'Fluffy the three-headed dog'
-    },
-    {
-      question: 'What is the name of Harry\'s owl?',
-      options: ['Crookshanks', 'Pigwidgeon', ' Hedwig', 'Fawkes'],
-      answer: 'Hedwig'
-    },
-    {
-      question: 'Which professor teaches Potions at Hogwarts?',
-      options: ['Professor Flitwick', 'Professor Snape', 'Professor McGonagall', 'Professor Trelawney'],
-      answer: 'Professor Snape'
-    }
-  ];
-
-  const hardQuestions = [
-    {
-      question: 'Which house was founded by Helga Hufflepuff?',
-      options: ['Slytherin', 'Ravenclaw', 'Hufflepuff', 'Gryffindor'],
-      answer: 'Hufflepuff'
-    },
-    {
-      question: 'What is the name of the wizarding bank in London?',
-      options: ['The Daily Prophet', 'Gringotts', 'The Leaky Cauldron', 'Nurmengard'],
-      answer: 'Gringotts'
-    },
-    {
-      question: 'Who wrote the spellbook "The Standard Book of Spells, Grade 1"?',
-      options: ['Albus Dumbledore', 'Gilderoy Lockhart', 'Miranda Goshawk', 'Ptolemy'],
-      answer: 'Miranda Goshawk'
-    },
-    {
-      question: 'What is the core of Harry\'s wand?',
-      options: ['Dragon heartstring', 'Phoenix feather', 'Unicorn hair', 'Veela hair'],
-      answer: 'Phoenix feather'
-    },
-    {
-      question: 'Which potion allows the drinker to assume another person\'s appearance?',
-      options: ['Polyjuice Potion', 'Felix Felicis', 'Amortentia', 'Draught of Living Death'],
-      answer: 'Polyjuice Potion'
-    },
-    {
-      question: 'What is the name of the hidden room that houses the Chamber of Secrets?',
-      options: ['The Room of Requirement', 'The Forgotten Forest', 'The Greenhouses', 'The Chamber of Secrets'],
-      answer: 'The Chamber of Secrets'
-    },
-    {
-      question: 'Which spell is used to conjure a patronus?',
-      options: ['Expecto Patronum', 'Lumos', 'Accio', 'Imperio'],
-      answer: 'Expecto Patronum'
-    },
-    {
-      question: 'Who is the Headmaster of Hogwarts during the first book?',
-      options: ['Professor Dumbledore', 'Professor Snape', 'Professor Slughorn', 'Professor McGonagall'],
-      answer: 'Professor Dumbledore'
-    },
-    {
-      question: 'What are the names of Harry\'s parents?',
-      options: ['James and Lily Potter', 'Arthur and Molly Weasley', 'Lucius and Narcissa Malfoy', 'Frank and Alice Longbottom'],
-      answer: 'James and Lily Potter'
-    },
-    {
-      question: 'What object is used to reveal hidden passages in Hogwarts?',
-      options: ['The Marauder\'s Map', 'The Sorting Hat', 'The Sword of Gryffindor', 'The Elder Wand'],
-      answer: 'The Marauder\'s Map'
-    }
-  ];
-
-  const quizConfig = [
-    {
-      key: 'easy',
-      title: 'Easy Difficulty',
-      amount: 5,
-      panel: document.getElementById('easyQuiz'),
-      questionEl: document.getElementById('easyQuestion'),
-      optionsEl: document.getElementById('easyOptions'),
-      scoreEl: document.getElementById('easyScore'),
-      wrongEl: document.getElementById('easyWrong'),
-      startBtn: document.getElementById('easyStart'),
-      questions: easyQuestions
-    },
-    {
-      key: 'hard',
-      title: 'Hard Difficulty',
-      amount: 10,
-      panel: document.getElementById('hardQuiz'),
-      questionEl: document.getElementById('hardQuestion'),
-      optionsEl: document.getElementById('hardOptions'),
-      scoreEl: document.getElementById('hardScore'),
-      wrongEl: document.getElementById('hardWrong'),
-      startBtn: document.getElementById('hardStart'),
-      questions: hardQuestions
-    }
-  ];
-
-  quizConfig.forEach((config) => {
-    if (!config.panel) return;
-
-    let currentIndex = 0;
+  const questions = {
+    easy: [
+      ['What is the name of the wizarding school Harry attends?', ['Beauxbatons', 'Hogwarts', 'Durmstrang', 'Ilvermorny'], 1],
+      ['Who is Harry’s brilliant and loyal friend?', ['Hermione Granger', 'Luna Lovegood', 'Cho Chang', 'Ginny Weasley'], 0],
+      ['How many main Harry Potter novels are there?', ['Five', 'Six', 'Seven', 'Eight'], 2],
+      ['What is the name of Harry’s owl?', ['Crookshanks', 'Hedwig', 'Fawkes', 'Pigwidgeon'], 1],
+      ['Which house is one of Hogwarts’ four houses?', ['Camelot', 'Gryffindor', 'Rivendell', 'Mordor'], 1]
+    ],
+    hard: [
+      ['Who founded Hufflepuff House?', ['Helga Hufflepuff', 'Rowena Ravenclaw', 'Godric Gryffindor', 'Salazar Slytherin'], 0],
+      ['What is the name of the wizarding bank?', ['Gringotts', 'The Leaky Cauldron', 'Ollivanders', 'St Mungo’s'], 0],
+      ['What is the core of Harry’s wand?', ['Dragon heartstring', 'Phoenix feather', 'Unicorn hair', 'Veela hair'], 1],
+      ['Which potion changes the drinker’s appearance?', ['Felix Felicis', 'Amortentia', 'Polyjuice Potion', 'Wolfsbane'], 2],
+      ['Which spell summons a Patronus?', ['Lumos', 'Expecto Patronum', 'Accio', 'Obliviate'], 1],
+      ['Who wrote A History of Magic?', ['Bathilda Bagshot', 'Miranda Goshawk', 'Newt Scamander', 'Gilderoy Lockhart'], 0],
+      ['What is the name of the Weasley family home?', ['Shell Cottage', 'The Burrow', 'Grimmauld Place', 'Spinner’s End'], 1],
+      ['Which dragon does Harry face in the Triwizard Tournament?', ['Hungarian Horntail', 'Chinese Fireball', 'Swedish Short-Snout', 'Common Welsh Green'], 0],
+      ['What is the name of the house-elf who serves the Malfoys?', ['Kreacher', 'Winky', 'Dobby', 'Hokey'], 2],
+      ['What does the Marauder’s Map reveal?', ['The future', 'People’s locations in Hogwarts', 'Hidden Horcruxes', 'A person’s thoughts'], 1]
+    ]
+  };
+  ['easy', 'hard'].forEach((level) => {
+    const root = document.getElementById(`${level}Quiz`);
+    if (!root) return;
+    const questionsForLevel = questions[level];
+    const questionNode = document.getElementById(`${level}Question`);
+    const optionsNode = document.getElementById(`${level}Options`);
+    const scoreNode = document.getElementById(`${level}Score`);
+    const wrongNode = document.getElementById(`${level}Wrong`);
+    const startButton = document.getElementById(`${level}Start`);
+    let index = 0;
     let score = 0;
-    let wrong = [];
-    let hasAnswered = false;
+    let missed = [];
+    let answered = false;
+    let nextTimer;
 
-    const updateStats = () => {
-      config.scoreEl.textContent = `Score: ${score}/${config.questions.length}`;
-      if (wrong.length) {
-        config.wrongEl.innerHTML = `<strong>Missed:</strong> ${wrong.join('<br>')}`;
-      } else {
-        config.wrongEl.innerHTML = '<strong>Missed:</strong> None!';
-      }
-    };
-
-    const renderQuestion = () => {
-      const q = config.questions[currentIndex];
-      if (!q) {
-        config.questionEl.textContent = `Quiz complete! You scored ${score} out of ${config.questions.length}.`;
-        config.optionsEl.innerHTML = '';
-        config.scoreEl.textContent = `Final score: ${score}/${config.questions.length}`;
-        if (wrong.length) {
-          config.wrongEl.innerHTML = `<strong>Wrong answers:</strong> ${wrong.join('<br>')}`;
-        } else {
-          config.wrongEl.innerHTML = '<strong>Wrong answers:</strong> You nailed every question!';
-        }
-        config.startBtn.textContent = `Play ${config.title} again`;
-        config.startBtn.disabled = false;
-        hasAnswered = false;
+    const render = () => {
+      if (index >= questionsForLevel.length) {
+        questionNode.textContent = `Quiz complete! You scored ${score} out of ${questionsForLevel.length}.`;
+        optionsNode.replaceChildren();
+        wrongNode.textContent = missed.length ? `Missed: ${missed.join(' | ')}` : 'Wrong answers: none — perfect!';
+        startButton.disabled = false;
+        startButton.textContent = 'Play again';
         return;
       }
-
-      hasAnswered = false;
-      config.questionEl.textContent = `${currentIndex + 1}. ${q.question}`;
-      config.optionsEl.innerHTML = q.options.map((option) => `
-        <button class="answer-btn" data-option="${option}">${option}</button>
-      `).join('');
-
-      config.optionsEl.querySelectorAll('.answer-btn').forEach((button) => {
+      const [text, choices, correct] = questionsForLevel[index];
+      questionNode.textContent = `${index + 1}. ${text}`;
+      optionsNode.replaceChildren();
+      choices.forEach((choice, choiceIndex) => {
+        const button = document.createElement('button');
+        button.className = 'answer-btn';
+        button.textContent = choice;
         button.addEventListener('click', () => {
-          if (hasAnswered) return;
-          hasAnswered = true;
-
-          const chosen = button.dataset.option;
-          const correct = q.answer;
-          const allButtons = config.optionsEl.querySelectorAll('.answer-btn');
-
-          allButtons.forEach((btn) => {
-            btn.disabled = true;
-            if (btn.dataset.option === correct) {
-              btn.classList.add('correct');
-            }
-            if (btn.dataset.option === chosen && chosen !== correct) {
-              btn.classList.add('incorrect');
-            }
+          if (answered) return;
+          answered = true;
+          optionsNode.querySelectorAll('button').forEach((option, i) => {
+            option.disabled = true;
+            if (i === correct) option.classList.add('correct');
+            if (i === choiceIndex && i !== correct) option.classList.add('incorrect');
           });
-
-          if (chosen === correct) {
-            score += 1;
-          } else {
-            wrong.push(`${currentIndex + 1}. ${q.question} — correct answer: ${correct}`);
-          }
-
-          updateStats();
-          setTimeout(() => {
-            currentIndex += 1;
-            renderQuestion();
-          }, 1100);
+          if (choiceIndex === correct) score += 1;
+          else missed.push(`${index + 1}. ${text} (answer: ${choices[correct]})`);
+          scoreNode.textContent = `Score: ${score}/${questionsForLevel.length}`;
+          wrongNode.textContent = missed.length ? `Missed: ${missed.join(' | ')}` : 'Missed: none';
+          nextTimer = setTimeout(() => { index += 1; answered = false; render(); }, 900);
         });
+        optionsNode.append(button);
       });
     };
 
-    config.startBtn.addEventListener('click', () => {
-      currentIndex = 0;
+    startButton.addEventListener('click', () => {
+      clearTimeout(nextTimer);
+      index = 0;
       score = 0;
-      wrong = [];
-      config.startBtn.disabled = true;
-      updateStats();
-      renderQuestion();
+      missed = [];
+      answered = false;
+      startButton.disabled = true;
+      wrongNode.textContent = 'Missed: none';
+      scoreNode.textContent = `Score: 0/${questionsForLevel.length}`;
+      render();
     });
-
-    updateStats();
   });
 }
 
-function setupBattleGame() {
-  const battlefield = document.getElementById('battlefield');
-  if (!battlefield) return;
+function setupMusic() {
+  const toggle = document.getElementById('musicToggle');
+  if (!toggle) return;
+  let context;
+  let timer;
+  let playing = false;
+  const playNote = (frequency, start, duration, volume, type) => {
+    const oscillator = context.createOscillator();
+    const gain = context.createGain();
+    oscillator.type = type;
+    oscillator.frequency.value = frequency;
+    gain.gain.setValueAtTime(0.0001, start);
+    gain.gain.exponentialRampToValueAtTime(volume, start + 0.02);
+    gain.gain.exponentialRampToValueAtTime(0.0001, start + duration);
+    oscillator.connect(gain);
+    gain.connect(context.destination);
+    oscillator.start(start);
+    oscillator.stop(start + duration);
+  };
+  const loop = () => {
+    if (!playing) return;
+    const now = context.currentTime;
+    const chords = [[196, 233, 294], [174, 220, 262], [146, 196, 247], [164, 207, 262]];
+    const chord = chords[Math.floor(Date.now() / 4000) % chords.length];
+    chord.forEach((note, i) => playNote(note, now + i * 0.04, 2.8, 0.018, 'triangle'));
+    playNote(chord[2] * 2, now + 0.6, 0.16, 0.012, 'sine');
+    playNote(chord[1] * 2, now + 1.5, 0.12, 0.01, 'sine');
+    timer = setTimeout(loop, 4000);
+  };
+  toggle.addEventListener('click', async () => {
+    if (!context) context = new (window.AudioContext || window.webkitAudioContext)();
+    if (context.state === 'suspended') await context.resume();
+    playing = !playing;
+    toggle.textContent = playing ? 'Pause chill music' : 'Play chill music';
+    toggle.setAttribute('aria-pressed', String(playing));
+    clearTimeout(timer);
+    if (playing) loop();
+  });
+}
 
-  const player = document.getElementById('player');
-  const stageMessage = document.getElementById('stageMessage');
-  const healthFill = document.getElementById('healthFill');
-  const healthValue = document.getElementById('healthValue');
-  const stageValue = document.getElementById('stageValue');
-  const scoreValue = document.getElementById('scoreValue');
-  const spellButtons = document.querySelectorAll('.spell-button');
+function setupBattle() {
+  const canvas = document.getElementById('battleCanvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const arena = document.getElementById('arena');
+  const state = {
+    active: true, ended: false, last: 0, stage: 1, elapsed: 0, phase: 1,
+    player: { x: 500, y: 500, radius: 32, speed: 245, hp: 100, burn: 0, stun: 0, shield: 0, slippery: 0 },
+    shots: [], lasers: [], trails: [], keys: new Set(), spawn: 0, horde: 0, shop: false,
+    counts: JSON.parse(localStorage.getItem('hpTokens') || '{"red":0,"blue":0,"orange":0,"fire":0,"laser":0,"stun":0}'),
+    spells: JSON.parse(localStorage.getItem('hpSpells') || '[]'),
+    cooldown: {}, score: 0, steam: [], audio: null, soundOn: false, musicTimer: 0
+  };
+  const kinds = ['red', 'blue', 'orange', 'fire', 'laser', 'stun'];
+  const labels = { red: 'Stupefy', blue: 'Protego', orange: 'Accio', fire: 'Incendio', laser: 'Finite Incantatem', stun: 'Expecto Patronum' };
+  const shop = document.getElementById('shopPanel');
+  const pause = document.getElementById('pausePanel');
+  const end = document.getElementById('endPanel');
 
-  const game = {
-    width: battlefield.clientWidth,
-    height: battlefield.clientHeight,
-    player: {
-      x: battlefield.clientWidth / 2,
-      y: battlefield.clientHeight / 2,
-      radius: 41,
-      speed: 5.4
-    },
-    projectiles: [],
-    radius: 120,
-    level: 1,
-    health: 100,
-    score: 0,
-    running: true,
-    lastSpawn: 0,
-    stageTimer: 0,
-    animFrame: null,
-    audio: null,
-    ambientLoop: null,
-    projectilesThisStage: 0,
-    baseStageDuration: 12000,
-    keys: {
-      ArrowUp: false,
-      ArrowDown: false,
-      ArrowLeft: false,
-      ArrowRight: false,
-      w: false,
-      s: false,
-      a: false,
-      d: false
+  function resize() {
+    const rect = canvas.getBoundingClientRect();
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    canvas.width = Math.max(1, Math.round(rect.width * dpr));
+    canvas.height = Math.max(1, Math.round(rect.height * dpr));
+    ctx.setTransform(canvas.width / 1000, 0, 0, canvas.height / 1000, 0, 0);
+  }
+  window.addEventListener('resize', resize);
+  resize();
+
+  function updateHud() {
+    document.getElementById('stageLabel').textContent = `Stage ${state.stage} / 5`;
+    document.getElementById('phaseLabel').textContent = state.stage === 5 ? `Boss phase ${state.phase} / 3` : ['The castle is quiet', 'Fire and warning beams', 'Homing curses', 'Horde incoming'][state.stage - 1];
+    document.getElementById('healthLabel').textContent = `${Math.max(0, Math.ceil(state.player.hp))} HP`;
+    document.getElementById('healthBar').style.width = `${Math.max(0, state.player.hp)}%`;
+    document.getElementById('spellBar').replaceChildren();
+    state.spells.forEach((kind, i) => {
+      const button = document.createElement('button');
+      button.className = 'game-button spell-slot';
+      button.textContent = `${i + 1} · ${labels[kind]}`;
+      button.title = `Use ${labels[kind]} (key ${i + 1})`;
+      button.addEventListener('click', () => cast(kind));
+      document.getElementById('spellBar').append(button);
+    });
+  }
+
+  function renderShop() {
+    document.getElementById('tokenCount').textContent = kinds.map((kind) => `${labels[kind]}: ${state.counts[kind]}`).join('  ·  ');
+    const list = document.getElementById('shopItems');
+    list.replaceChildren();
+    kinds.forEach((kind) => {
+      const row = document.createElement('div');
+      row.className = 'shop-row';
+      const description = document.createElement('span');
+      description.textContent = `${labels[kind]} · 50 ${kind} tokens`;
+      const button = document.createElement('button');
+      button.className = 'game-button';
+      button.textContent = state.spells.includes(kind) ? 'Owned' : 'Buy';
+      button.disabled = state.spells.includes(kind) || state.counts[kind] < 50 || state.spells.length >= 6;
+      button.addEventListener('click', () => {
+        if (state.counts[kind] < 50 || state.spells.includes(kind)) return;
+        state.counts[kind] -= 50;
+        state.spells.push(kind);
+        localStorage.setItem('hpSpells', JSON.stringify(state.spells));
+        localStorage.setItem('hpTokens', JSON.stringify(state.counts));
+        renderShop();
+        updateHud();
+      });
+      row.append(description, button);
+      list.append(row);
+    });
+  }
+
+  function pointOnSegment(px, py, x1, y1, x2, y2) {
+    const dx = x2 - x1;
+    const dy = y2 - y1;
+    const t = Math.max(0, Math.min(1, ((px - x1) * dx + (py - y1) * dy) / (dx * dx + dy * dy || 1)));
+    return Math.hypot(px - (x1 + t * dx), py - (y1 + t * dy));
+  }
+  function makeShot(kind, x, y, angle, speed, options = {}) {
+    const shot = { kind, x, y, vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed, size: kind === 'red' ? 12 : 10, entered: x >= 0 && x <= 1000 && y >= 0 && y <= 1000, homing: options.homing || false, horde: options.horde || false, timer: 0, hit: false };
+    state.shots.push(shot);
+    return shot;
+  }
+  function spawn(kind) {
+    const side = Math.floor(Math.random() * 4);
+    let x = Math.random() * 1000, y = Math.random() * 1000;
+    if (side === 0) y = -16;
+    if (side === 1) x = 1016;
+    if (side === 2) y = 1016;
+    if (side === 3) x = -16;
+    const angle = Math.atan2(500 - y, 500 - x);
+    const speed = 145 + Math.min(state.stage - 1, 1) * 55 + Math.max(0, state.stage - 2) * 24;
+    makeShot(kind, x, y, angle + (Math.random() - 0.5) * 0.18, speed, { homing: kind.includes('homing') || kind === 'orange' });
+  }
+  function spawnLaser() {
+    const horizontal = Math.random() > 0.5;
+    const line = horizontal ? { x1: 0, y1: 120 + Math.random() * 760, x2: 1000, y2: 120 + Math.random() * 760, warning: 1.2, live: 0.45 } :
+      { x1: 120 + Math.random() * 760, y1: 0, x2: 120 + Math.random() * 760, y2: 1000, warning: 1.2, live: 0.45 };
+    line.y2 = horizontal ? line.y1 : 1000;
+    line.x2 = horizontal ? 1000 : line.x1;
+    line.kind = 'laser';
+    state.lasers.push(line);
+  }
+  function chooseAttack() {
+    if (state.stage === 1) return ['red', 'blue', 'orange'][Math.floor(Math.random() * 3)];
+    if (state.stage === 2) return ['red', 'blue', 'orange', 'fire', 'laser'][Math.floor(Math.random() * 5)];
+    if (state.stage === 3) return ['blue-homing', 'fire-homing', 'stun'][Math.floor(Math.random() * 3)];
+    return ['red', 'blue', 'orange', 'fire', 'stun'][Math.floor(Math.random() * 5)];
+  }
+  function spawnHorde() {
+    for (let i = 0; i < 15; i++) {
+      const angle = Math.random() * Math.PI * 2;
+      const radius = 30 + Math.random() * 350;
+      makeShot('red', 500 + Math.cos(angle) * radius, 500 + Math.sin(angle) * radius, Math.random() * Math.PI * 2, 220 + Math.random() * 30, { horde: true });
     }
-  };
-
-  function initAudio() {
-    if (game.audio) return;
-    const AudioCtx = window.AudioContext || window.webkitAudioContext;
-    if (!AudioCtx) return;
-
-    game.audio = new AudioCtx();
-    const createTone = (frequency, duration, volume, type = 'sine', delay = 0) => {
-      const osc = game.audio.createOscillator();
-      const gain = game.audio.createGain();
-      osc.type = type;
-      osc.frequency.value = frequency;
-      gain.gain.value = 0;
-      osc.connect(gain);
-      gain.connect(game.audio.destination);
-      const startTime = game.audio.currentTime + delay;
-      gain.gain.linearRampToValueAtTime(volume, startTime + 0.02);
-      gain.gain.exponentialRampToValueAtTime(0.0001, startTime + duration);
-      osc.start(startTime);
-      osc.stop(startTime + duration + 0.05);
-    };
-
-    const ambientPattern = () => {
-      if (!game.running) return;
-      const root = [220, 262, 330, 392][(game.level - 1) % 4];
-      const note = root / (game.level >= 4 ? 1.3 : 1);
-      createTone(note, 0.65, 0.025, 'triangle', 0);
-      createTone(note * 1.5, 0.75, 0.018, 'sine', 0.18);
-      setTimeout(() => ambientPattern(), 650 - ((game.level - 1) * 90));
-    };
-
-    game.ambientLoop = ambientPattern;
-    ambientPattern();
   }
 
-  const updateHud = () => {
-    healthFill.style.width = `${Math.max(game.health, 0)}%`;
-    healthValue.textContent = `Health: ${Math.max(Math.round(game.health), 0)}`;
-    stageValue.textContent = `Stage ${game.level}/5`;
-    scoreValue.textContent = `Score: ${game.score}`;
-  };
-
-  function movePlayer() {
-    const { keys, player } = game;
-    let dx = 0;
-    let dy = 0;
-
-    if (keys.ArrowUp || keys.w) dy -= 1;
-    if (keys.ArrowDown || keys.s) dy += 1;
-    if (keys.ArrowLeft || keys.a) dx -= 1;
-    if (keys.ArrowRight || keys.d) dx += 1;
-
-    const length = Math.hypot(dx, dy) || 1;
-    const stepX = (dx / length) * player.speed;
-    const stepY = (dy / length) * player.speed;
-
-    const maxDistanceX = (game.width * 0.7) / 2 - player.radius - 12;
-    const maxDistanceY = (game.height * 0.7) / 2 - player.radius - 12;
-
-    player.x = Math.max(game.width / 2 - maxDistanceX, Math.min(game.width / 2 + maxDistanceX, player.x + stepX));
-    player.y = Math.max(game.height / 2 - maxDistanceY, Math.min(game.height / 2 + maxDistanceY, player.y + stepY));
+  function playGameMusic() {
+    if (!state.soundOn) return;
+    if (!state.active) {
+      state.musicTimer = window.setTimeout(playGameMusic, 500);
+      return;
+    }
+    const now = state.audio.currentTime;
+    const notes = [196, 220, 262, 294, 330];
+    const frequency = notes[state.stage - 1] * (1 + (state.stage - 1) * 0.08);
+    const oscillator = state.audio.createOscillator();
+    const gain = state.audio.createGain();
+    oscillator.type = state.stage < 3 ? 'triangle' : 'sawtooth';
+    oscillator.frequency.value = frequency;
+    gain.gain.setValueAtTime(0.0001, now);
+    gain.gain.exponentialRampToValueAtTime(0.018, now + 0.06);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.5);
+    oscillator.connect(gain); gain.connect(state.audio.destination);
+    oscillator.start(now); oscillator.stop(now + 0.55);
+    state.musicTimer = window.setTimeout(playGameMusic, Math.max(300, 1150 - state.stage * 150));
+  }
+  async function toggleGameMusic() {
+    if (!state.audio) state.audio = new (window.AudioContext || window.webkitAudioContext)();
+    if (state.audio.state === 'suspended') await state.audio.resume();
+    state.soundOn = !state.soundOn;
+    document.getElementById('soundToggle').textContent = `Sound: ${state.soundOn ? 'on' : 'off'}`;
+    window.clearTimeout(state.musicTimer);
+    if (state.soundOn) playGameMusic();
   }
 
-  function spawnProjectile() {
-    const edge = Math.floor(Math.random() * 4);
-    const pad = 18;
-    let x = 0;
-    let y = 0;
+  function cast(kind) {
+    if (!state.active || !state.spells.includes(kind) || (state.cooldown[kind] || 0) > 0) return;
+    state.cooldown[kind] = 4;
+    if (kind === 'red') {
+      state.shots = state.shots.filter((shot) => Math.hypot(shot.x - state.player.x, shot.y - state.player.y) > 175);
+    } else if (kind === 'blue') {
+      state.player.shield = 2.5;
+    } else if (kind === 'orange') {
+      state.shots.forEach((shot) => { shot.vx *= 0.25; shot.vy *= 0.25; });
+      state.player.slippery = 0;
+    } else if (kind === 'fire') {
+      state.player.burn = 0;
+      state.player.hp = Math.min(100, state.player.hp + 20);
+      state.shots = state.shots.filter((shot) => !shot.kind.startsWith('fire'));
+    } else if (kind === 'laser') {
+      state.lasers = [];
+      state.player.shield = 1.5;
+    } else if (kind === 'stun') {
+      state.shots = state.shots.filter((shot) => Math.hypot(shot.x - state.player.x, shot.y - state.player.y) > 250);
+    }
+  }
 
-    if (edge === 0) {
-      x = Math.random() * game.width;
-      y = -pad;
-    } else if (edge === 1) {
-      x = game.width + pad;
-      y = Math.random() * game.height;
-    } else if (edge === 2) {
-      x = Math.random() * game.width;
-      y = game.height + pad;
+  function startOver() {
+    state.active = true; state.ended = false; state.last = 0; state.stage = 1; state.elapsed = 0; state.phase = 1;
+    state.player = { x: 500, y: 500, radius: 32, speed: 245, hp: 100, burn: 0, stun: 0, shield: 0, slippery: 0 };
+    state.shots = []; state.lasers = []; state.trails = []; state.spawn = 0; state.horde = 0; state.score = 0; state.cooldown = {};
+    [pause, end, shop].forEach((panel) => { panel.hidden = true; });
+    updateHud();
+    if (state.soundOn) playGameMusic();
+  }
+
+  function finish(won) {
+    state.active = false;
+    state.ended = true;
+    document.getElementById('endTitle').textContent = won ? 'You Win!' : 'Battle Lost';
+    document.getElementById('endMessage').textContent = won ? 'You survived all five stages. Your purchased spells are saved—play again?' : 'The curses caught up with you. Your purchased spells are saved—try again?';
+    document.getElementById('retryButton').textContent = won ? 'Play Again' : 'Retry';
+    window.clearTimeout(state.musicTimer);
+    state.soundOn = false;
+    document.getElementById('soundToggle').textContent = 'Sound: off';
+    end.hidden = false;
+  }
+
+  function update(dt) {
+    state.elapsed += dt;
+    if (state.stage < 5) {
+      if (state.elapsed >= 20) {
+        state.elapsed = 0;
+        state.stage += 1;
+      }
     } else {
-      x = -pad;
-      y = Math.random() * game.height;
+      state.phase = Math.min(3, Math.floor(state.elapsed / 12) + 1);
+      if (state.elapsed >= 36) { finish(true); return; }
+    }
+    Object.keys(state.cooldown).forEach((kind) => { state.cooldown[kind] = Math.max(0, state.cooldown[kind] - dt); });
+    const player = state.player;
+    player.stun = Math.max(0, player.stun - dt);
+    player.shield = Math.max(0, player.shield - dt);
+    player.slippery = Math.max(0, player.slippery - dt);
+    player.burn = Math.max(0, player.burn - dt);
+    if (player.burn > 0) player.hp -= dt;
+    if (player.stun <= 0) {
+      const speed = player.speed * (player.burn > 0 ? 0.8 : 1) * (player.slippery > 0 ? 0.55 : 1);
+      let dx = Number(state.keys.has('ArrowRight') || state.keys.has('d')) - Number(state.keys.has('ArrowLeft') || state.keys.has('a'));
+      let dy = Number(state.keys.has('ArrowDown') || state.keys.has('s')) - Number(state.keys.has('ArrowUp') || state.keys.has('w'));
+      const length = Math.hypot(dx, dy) || 1;
+      player.x = Math.max(35, Math.min(965, player.x + dx / length * speed * dt));
+      player.y = Math.max(35, Math.min(965, player.y + dy / length * speed * dt));
     }
 
-    const targetX = game.width / 2;
-    const targetY = game.height / 2;
-    const dx = targetX - x;
-    const dy = targetY - y;
-    const length = Math.hypot(dx, dy) || 1;
-
-    const speed = 1.2 + game.level * 0.7 + Math.random() * 0.8;
-    const projectile = {
-      x,
-      y,
-      vx: (dx / length) * speed,
-      vy: (dy / length) * speed,
-      size: 16 + Math.random() * 10,
-      element: document.createElement('div')
-    };
-
-    projectile.element.className = 'projectile';
-    projectile.element.style.width = `${projectile.size}px`;
-    projectile.element.style.height = `${projectile.size}px`;
-    projectile.element.style.left = `${x - projectile.size / 2}px`;
-    projectile.element.style.top = `${y - projectile.size / 2}px`;
-    battlefield.appendChild(projectile.element);
-    game.projectiles.push(projectile);
-  }
-
-  function castSpell(name) {
-    if (!game.running) return;
-
-    const spellMap = {
-      Expelliarmus: { radius: 110, damage: 30, color: 'rgba(90, 156, 255, 0.8)' },
-      Protego: { radius: 130, damage: 0, color: 'rgba(125, 234, 204, 0.8)' },
-      'Wingardium Leviosa': { radius: 80, damage: 18, color: 'rgba(255, 225, 120, 0.8)' },
-      Lumos: { radius: 100, damage: 12, color: 'rgba(255, 251, 189, 0.8)' },
-      Stupefy: { radius: 120, damage: 24, color: 'rgba(166, 52, 52, 0.8)' }
-    };
-
-    const config = spellMap[name];
-    if (!config) return;
-
-    const burst = document.createElement('div');
-    burst.className = 'spell-burst';
-    burst.style.left = `${game.player.x - config.radius}px`;
-    burst.style.top = `${game.player.y - config.radius}px`;
-    burst.style.width = `${config.radius * 2}px`;
-    burst.style.height = `${config.radius * 2}px`;
-    burst.style.background = `radial-gradient(circle, ${config.color}, rgba(255,255,255,0) 70%)`;
-    battlefield.appendChild(burst);
-    setTimeout(() => burst.remove(), 500);
-
-    const remaining = [];
-    game.projectiles.forEach((projectile) => {
-      const distance = Math.hypot(projectile.x - game.player.x, projectile.y - game.player.y);
-      if (distance <= config.radius) {
-        game.score += 12;
-        if (config.damage > 0) {
-          game.health = Math.min(100, game.health + 6);
+    state.spawn += dt;
+    const boss = state.stage === 5;
+    const laserPhase = boss && (state.phase === 1 || state.phase === 3);
+    const nonLaserPhase = !boss || state.phase >= 2;
+    const spawnEvery = state.stage === 1 ? 1.4 : state.stage === 2 ? 1.05 : state.stage === 3 ? 0.85 : 0.72;
+    state.horde = Math.max(0, state.horde - dt);
+    if (state.stage === 4 && !boss) {
+      if (state.horde === 0 && Math.random() < dt * 0.08) {
+        state.horde = 1.8;
+        state.spawn = 0;
+        spawnHorde();
+      } else if (state.horde === 0 && state.spawn > spawnEvery) {
+        state.spawn = 0;
+        spawn(chooseAttack());
+      }
+    } else if (!boss && state.stage < 5 && state.spawn > spawnEvery) {
+      state.spawn = 0;
+      const kind = chooseAttack();
+      if (kind === 'laser') spawnLaser(); else spawn(kind);
+    } else if (boss && laserPhase && state.spawn > 1.4) {
+      state.spawn = 0;
+      spawnLaser();
+      if (nonLaserPhase && state.phase === 3 && Math.random() < 0.75) spawn(chooseAttack());
+      if (state.phase === 3 && Math.random() < dt * 0.08) spawnHorde();
+    } else if (boss && state.phase === 2 && state.spawn > 0.75) {
+      state.spawn = 0;
+      spawn(chooseAttack());
+    }
+    if (boss && state.phase === 2 && Math.random() < dt * 0.08) spawnHorde();
+    state.shots.forEach((shot) => {
+      if (state.stage === 4 && state.horde > 0 && !shot.horde) return;
+      shot.timer += dt;
+      shot.trailTimer = (shot.trailTimer || 0) + dt;
+      if (shot.homing && shot.timer < 2) {
+        const angle = Math.atan2(player.y - shot.y, player.x - shot.x);
+        const speed = Math.hypot(shot.vx, shot.vy);
+        shot.vx += (Math.cos(angle) * speed - shot.vx) * dt * 1.1;
+        shot.vy += (Math.sin(angle) * speed - shot.vy) * dt * 1.1;
+      }
+      shot.x += shot.vx * dt;
+      shot.y += shot.vy * dt;
+      if (shot.trailTimer > 0.09) {
+        const trailKind = shot.kind.startsWith('blue') ? 'blue' : shot.kind.startsWith('fire') ? 'fire' : null;
+        if (trailKind) {
+          const trail = { x: shot.x, y: shot.y, kind: trailKind, life: 1.5 };
+          for (const other of state.trails) {
+            if (other.kind !== trailKind && Math.hypot(trail.x - other.x, trail.y - other.y) < 30) {
+              state.steam.push({ x: trail.x, y: trail.y, life: 1.2 });
+              break;
+            }
+          }
+          state.trails.push(trail);
+          shot.trailTimer = 0;
+        }
+      }
+      if (shot.x >= 0 && shot.x <= 1000 && shot.y >= 0 && shot.y <= 1000) shot.entered = true;
+      if (shot.entered && (shot.x < -25 || shot.x > 1025 || shot.y < -25 || shot.y > 1025)) {
+        const token = shot.kind.replace('-homing', '');
+        if (state.counts[token] !== undefined) {
+          state.counts[token] += 1;
+          localStorage.setItem('hpTokens', JSON.stringify(state.counts));
+        }
+        shot.gone = true;
+      }
+      const distance = Math.hypot(shot.x - player.x, shot.y - player.y);
+      if (distance < shot.size + player.radius && !shot.hit) {
+        shot.hit = true;
+        shot.gone = true;
+        if (!player.shield) {
+          if (shot.kind === 'fire' || shot.kind === 'fire-homing') player.burn = 5;
+          else if (shot.kind === 'stun') player.stun = 1;
+          else if (shot.kind === 'blue' || shot.kind === 'blue-homing') player.slippery = 2;
+          else player.hp -= 10;
+        }
+      }
+    });
+    state.shots = state.shots.filter((shot) => !shot.gone);
+    state.trails.forEach((trail) => {
+      trail.life -= dt;
+      if (trail.kind === 'blue' && Math.hypot(trail.x - player.x, trail.y - player.y) < 30) player.slippery = Math.max(player.slippery, 0.7);
+      if (trail.kind === 'fire' && Math.hypot(trail.x - player.x, trail.y - player.y) < 30) player.burn = Math.max(player.burn, 0.7);
+    });
+    state.trails = state.trails.filter((trail) => trail.life > 0);
+    state.lasers.forEach((laser) => {
+      if (laser.warning > 0) {
+        laser.warning -= dt;
+        if (laser.warning <= 0) {
+          const d = pointOnSegment(player.x, player.y, laser.x1, laser.y1, laser.x2, laser.y2);
+          if (d < player.radius + 12 && !player.shield) player.hp = 0;
         }
       } else {
-        remaining.push(projectile);
+        laser.live -= dt;
+        if (laser.live <= 0 && !laser.gone) {
+          state.counts.laser += 1;
+          localStorage.setItem('hpTokens', JSON.stringify(state.counts));
+          laser.gone = true;
+        }
       }
     });
-
-    game.projectiles = remaining;
-    game.projectiles.forEach((projectile) => projectile.element.remove());
-
-    if (name === 'Protego') {
-      game.health = Math.min(100, game.health + 10);
-    }
-
+    state.lasers = state.lasers.filter((laser) => !laser.gone);
+    state.steam.forEach((cloud) => { cloud.life -= dt; });
+    state.steam = state.steam.filter((cloud) => cloud.life > 0);
+    if (player.hp <= 0) finish(false);
     updateHud();
-    if (game.audio) {
-      const oscillator = game.audio.createOscillator();
-      const gain = game.audio.createGain();
-      oscillator.type = 'triangle';
-      oscillator.frequency.value = name === 'Protego' ? 300 : 440;
-      gain.gain.value = 0.02;
-      oscillator.connect(gain);
-      gain.connect(game.audio.destination);
-      oscillator.start();
-      oscillator.stop(game.audio.currentTime + 0.14);
-    }
   }
 
-  function checkCollisions() {
-    game.projectiles.forEach((projectile) => {
-      const distance = Math.hypot(projectile.x - game.player.x, projectile.y - game.player.y);
-      if (distance < projectile.size / 2 + game.player.radius) {
-        game.health -= 14;
-        projectile.element.remove();
-        projectile.hit = true;
-      }
+  function draw() {
+    ctx.clearRect(0, 0, 1000, 1000);
+    ctx.fillStyle = '#100a19'; ctx.fillRect(0, 0, 1000, 1000);
+    const gradient = ctx.createRadialGradient(500, 500, 30, 500, 500, 700);
+    gradient.addColorStop(0, '#302044'); gradient.addColorStop(1, '#0c0812');
+    ctx.fillStyle = gradient; ctx.fillRect(0, 0, 1000, 1000);
+    state.trails.forEach((trail) => {
+      ctx.globalAlpha = Math.min(0.3, trail.life * 0.12);
+      ctx.fillStyle = trail.kind === 'blue' ? '#54bfff' : '#ff5524';
+      ctx.beginPath(); ctx.arc(trail.x, trail.y, 23, 0, Math.PI * 2); ctx.fill();
     });
-    game.projectiles = game.projectiles.filter((projectile) => !projectile.hit);
-  }
-
-  function advanceStage() {
-    if (game.level >= 5) {
-      stageMessage.textContent = 'You survived all five stages! The castle is safe... for now.';
-      game.running = false;
-      return;
-    }
-    game.level += 1;
-    stageMessage.textContent = `Level ${game.level}: Darker magic is rising. Brace yourself!`;
-    if (game.audio) {
-      const oscillator = game.audio.createOscillator();
-      const gain = game.audio.createGain();
-      oscillator.type = 'sawtooth';
-      oscillator.frequency.value = 220 + game.level * 48;
-      gain.gain.value = 0.03;
-      oscillator.connect(gain);
-      gain.connect(game.audio.destination);
-      oscillator.start();
-      oscillator.stop(game.audio.currentTime + 0.2);
-    }
-    updateHud();
-  }
-
-  function gameLoop(timestamp) {
-    if (!game.running) return;
-
-    if (timestamp - game.lastSpawn > 1000 - game.level * 130) {
-      spawnProjectile();
-      game.lastSpawn = timestamp;
-    }
-
-    movePlayer();
-    player.style.left = `${game.player.x}px`;
-    player.style.top = `${game.player.y}px`;
-
-    game.projectiles.forEach((projectile) => {
-      projectile.x += projectile.vx * 2;
-      projectile.y += projectile.vy * 2;
-      projectile.element.style.left = `${projectile.x - projectile.size / 2}px`;
-      projectile.element.style.top = `${projectile.y - projectile.size / 2}px`;
+    ctx.globalAlpha = 1;
+    state.steam.forEach((cloud) => {
+      ctx.globalAlpha = Math.min(0.82, cloud.life * 0.9);
+      ctx.fillStyle = '#d9e3e5'; ctx.beginPath(); ctx.arc(cloud.x, cloud.y, 90, 0, Math.PI * 2); ctx.fill();
     });
-
-    checkCollisions();
-    updateHud();
-
-    if (game.health <= 0) {
-      game.running = false;
-      stageMessage.textContent = 'The attacks were too much. The battle is lost — try again.';
-      return;
-    }
-
-    if (timestamp - game.stageTimer > game.baseStageDuration) {
-      game.stageTimer = timestamp;
-      advanceStage();
-    }
-
-    if (game.level >= 5 && game.projectiles.length === 0 && timestamp - game.lastSpawn > 2500) {
-      stageMessage.textContent = 'The final wave is near. Hold your ground!';
-    }
-
-    game.animFrame = requestAnimationFrame(gameLoop);
+    ctx.globalAlpha = 1;
+    state.lasers.forEach((laser) => {
+      ctx.beginPath(); ctx.moveTo(laser.x1, laser.y1); ctx.lineTo(laser.x2, laser.y2);
+      ctx.lineWidth = laser.warning > 0 ? 3 : 24;
+      ctx.strokeStyle = laser.warning > 0 ? 'rgba(255,60,65,.72)' : '#45ff72';
+      ctx.shadowBlur = laser.warning > 0 ? 0 : 25; ctx.shadowColor = '#45ff72'; ctx.stroke(); ctx.shadowBlur = 0;
+    });
+    state.shots.forEach((shot) => {
+      const color = shot.kind.startsWith('blue') ? '#56baff' : shot.kind.startsWith('fire') ? '#ff4f22' : shot.kind === 'orange' ? '#ff9b37' : shot.kind === 'stun' ? '#70c8ff' : '#ff3348';
+      ctx.fillStyle = color; ctx.shadowBlur = 15; ctx.shadowColor = color;
+      ctx.beginPath(); ctx.arc(shot.x, shot.y, shot.size, 0, Math.PI * 2); ctx.fill(); ctx.shadowBlur = 0;
+      ctx.fillStyle = 'rgba(255,255,255,.9)'; ctx.beginPath(); ctx.arc(shot.x - 3, shot.y - 3, shot.size * 0.35, 0, Math.PI * 2); ctx.fill();
+    });
+    ctx.strokeStyle = 'rgba(255,255,255,.95)'; ctx.lineWidth = 3; ctx.strokeRect(12, 12, 976, 976);
+    const player = state.player;
+    ctx.fillStyle = player.shield ? '#70f5db' : '#f2d67b';
+    ctx.shadowBlur = 24; ctx.shadowColor = ctx.fillStyle;
+    ctx.beginPath(); ctx.arc(player.x, player.y, player.radius, 0, Math.PI * 2); ctx.fill(); ctx.shadowBlur = 0;
+    if (player.burn > 0) { ctx.strokeStyle = '#ff4f22'; ctx.lineWidth = 5; ctx.beginPath(); ctx.arc(player.x, player.y, 19, 0, Math.PI * 2); ctx.stroke(); }
   }
-
+  function frame(time) {
+    if (state.active) {
+      const dt = Math.min(0.04, (time - (state.last || time)) / 1000);
+      state.last = time;
+      update(dt);
+    }
+    draw();
+    requestAnimationFrame(frame);
+  }
   document.addEventListener('keydown', (event) => {
-    const key = event.key.length === 1 ? event.key.toLowerCase() : event.key;
-    if (game.keys[key] !== undefined) {
-      game.keys[key] = true;
-    }
+    const key = event.key.toLowerCase();
+    if (['arrowup', 'arrowdown', 'arrowleft', 'arrowright', ' '].includes(key)) event.preventDefault();
+    if (/^[1-6]$/.test(key)) cast(state.spells[Number(key) - 1]);
+    if (key === 'p' && state.active) showPause();
+    state.keys.add(key);
   });
-
-  document.addEventListener('keyup', (event) => {
-    const key = event.key.length === 1 ? event.key.toLowerCase() : event.key;
-    if (game.keys[key] !== undefined) {
-      game.keys[key] = false;
-    }
+  document.addEventListener('keyup', (event) => state.keys.delete(event.key.toLowerCase()));
+  document.getElementById('pauseButton').addEventListener('click', showPause);
+  document.getElementById('soundToggle').addEventListener('click', toggleGameMusic);
+  document.getElementById('resumeButton').addEventListener('click', () => { pause.hidden = true; state.active = true; state.last = 0; });
+  document.getElementById('retryButton').addEventListener('click', startOver);
+  document.getElementById('shopToggle').addEventListener('click', () => { renderShop(); shop.hidden = false; state.active = false; });
+  document.getElementById('closeShop').addEventListener('click', () => { shop.hidden = true; state.active = true; state.last = 0; });
+  function showPause() { state.active = false; pause.hidden = false; }
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden && state.active) showPause();
   });
-
-  spellButtons.forEach((button) => {
-    button.addEventListener('click', () => {
-      initAudio();
-      castSpell(button.dataset.spell);
-    });
+  arena.addEventListener('pointerdown', (event) => {
+    if (!state.active || event.target !== canvas || state.player.stun > 0) return;
+    const rect = canvas.getBoundingClientRect();
+    state.player.x = Math.max(35, Math.min(965, (event.clientX - rect.left) / rect.width * 1000));
+    state.player.y = Math.max(35, Math.min(965, (event.clientY - rect.top) / rect.height * 1000));
   });
-
-  battlefield.addEventListener('pointerdown', (event) => {
-    const rect = battlefield.getBoundingClientRect();
-    const x = event.clientX - rect.left;
-    const y = event.clientY - rect.top;
-    game.player.x = Math.max(48, Math.min(game.width - 48, x));
-    game.player.y = Math.max(48, Math.min(game.height - 48, y));
-    player.style.left = `${game.player.x}px`;
-    player.style.top = `${game.player.y}px`;
-  });
-
-  initAudio();
+  renderShop();
   updateHud();
-  game.stageTimer = performance.now();
-  stageMessage.textContent = 'Level 1: Calm magic surrounds the castle. Stay steady.';
-  game.animFrame = requestAnimationFrame(gameLoop);
+  requestAnimationFrame(frame);
 }

@@ -147,8 +147,11 @@ function setupBattle() {
     shots: [], lasers: [], trails: [], keys: new Set(), spawn: 0, horde: 0, shop: false,
     counts: JSON.parse(localStorage.getItem('hpTokens') || '{"red":0,"blue":0,"orange":0,"fire":0,"laser":0,"stun":0}'),
     spells: JSON.parse(localStorage.getItem('hpSpells') || '[]'),
+    freeUpgrades: localStorage.getItem('hpFreeUpgrades') === 'true',
     cooldown: {}, score: 0, steam: [], audio: null, soundOn: false, musicTimer: 0
   };
+  const playerImage = new Image();
+  playerImage.src = 'assets/daniel-radcliffe.jpg';
   const kinds = ['red', 'blue', 'orange', 'fire', 'laser', 'stun'];
   const labels = { red: 'Stupefy', blue: 'Protego', orange: 'Accio', fire: 'Incendio', laser: 'Finite Incantatem', stun: 'Expecto Patronum' };
   const shop = document.getElementById('shopPanel');
@@ -185,18 +188,33 @@ function setupBattle() {
     document.getElementById('tokenCount').textContent = kinds.map((kind) => `${labels[kind]}: ${state.counts[kind]}`).join('  ·  ');
     const list = document.getElementById('shopItems');
     list.replaceChildren();
+    const freeRow = document.createElement('div');
+    freeRow.className = 'shop-row';
+    const freeDescription = document.createElement('span');
+    freeDescription.textContent = 'Spell upgrades';
+    const freeButton = document.createElement('button');
+    freeButton.className = 'game-button';
+    freeButton.textContent = state.freeUpgrades ? 'All upgrades are free' : 'Make all upgrades free';
+    freeButton.disabled = state.freeUpgrades;
+    freeButton.addEventListener('click', () => {
+      state.freeUpgrades = true;
+      localStorage.setItem('hpFreeUpgrades', 'true');
+      renderShop();
+    });
+    freeRow.append(freeDescription, freeButton);
+    list.append(freeRow);
     kinds.forEach((kind) => {
       const row = document.createElement('div');
       row.className = 'shop-row';
       const description = document.createElement('span');
-      description.textContent = `${labels[kind]} · 50 ${kind} tokens`;
+      description.textContent = `${labels[kind]} · ${state.freeUpgrades ? 'Free' : `50 ${kind} tokens`}`;
       const button = document.createElement('button');
       button.className = 'game-button';
       button.textContent = state.spells.includes(kind) ? 'Owned' : 'Buy';
-      button.disabled = state.spells.includes(kind) || state.counts[kind] < 50 || state.spells.length >= 6;
+      button.disabled = state.spells.includes(kind) || (!state.freeUpgrades && state.counts[kind] < 50) || state.spells.length >= 6;
       button.addEventListener('click', () => {
-        if (state.counts[kind] < 50 || state.spells.includes(kind)) return;
-        state.counts[kind] -= 50;
+        if ((!state.freeUpgrades && state.counts[kind] < 50) || state.spells.includes(kind) || state.spells.length >= 6) return;
+        if (!state.freeUpgrades) state.counts[kind] -= 50;
         state.spells.push(kind);
         localStorage.setItem('hpSpells', JSON.stringify(state.spells));
         localStorage.setItem('hpTokens', JSON.stringify(state.counts));
@@ -396,7 +414,7 @@ function setupBattle() {
       if (shot.trailTimer > 0.09) {
         const trailKind = shot.kind.startsWith('blue') ? 'blue' : shot.kind.startsWith('fire') ? 'fire' : null;
         if (trailKind) {
-          const trail = { x: shot.x, y: shot.y, kind: trailKind, life: 1.5 };
+          const trail = { x: shot.x, y: shot.y, kind: trailKind, life: 4.5 };
           for (const other of state.trails) {
             if (other.kind !== trailKind && Math.hypot(trail.x - other.x, trail.y - other.y) < 30) {
               state.steam.push({ x: trail.x, y: trail.y, life: 1.2 });
@@ -440,7 +458,7 @@ function setupBattle() {
         laser.warning -= dt;
         if (laser.warning <= 0) {
           const d = pointOnSegment(player.x, player.y, laser.x1, laser.y1, laser.x2, laser.y2);
-          if (d < player.radius + 12 && !player.shield) player.hp = 0;
+          if (d < player.radius + 36 && !player.shield) player.hp = 0;
         }
       } else {
         laser.live -= dt;
@@ -477,7 +495,7 @@ function setupBattle() {
     ctx.globalAlpha = 1;
     state.lasers.forEach((laser) => {
       ctx.beginPath(); ctx.moveTo(laser.x1, laser.y1); ctx.lineTo(laser.x2, laser.y2);
-      ctx.lineWidth = laser.warning > 0 ? 3 : 24;
+      ctx.lineWidth = laser.warning > 0 ? 3 : 72;
       ctx.strokeStyle = laser.warning > 0 ? 'rgba(255,60,65,.72)' : '#45ff72';
       ctx.shadowBlur = laser.warning > 0 ? 0 : 25; ctx.shadowColor = '#45ff72'; ctx.stroke(); ctx.shadowBlur = 0;
     });
@@ -492,6 +510,18 @@ function setupBattle() {
     ctx.fillStyle = player.shield ? '#70f5db' : '#f2d67b';
     ctx.shadowBlur = 24; ctx.shadowColor = ctx.fillStyle;
     ctx.beginPath(); ctx.arc(player.x, player.y, player.radius, 0, Math.PI * 2); ctx.fill(); ctx.shadowBlur = 0;
+    if (playerImage.complete && playerImage.naturalWidth) {
+      const side = Math.min(playerImage.naturalWidth, playerImage.naturalHeight);
+      const sx = (playerImage.naturalWidth - side) / 2;
+      const sy = (playerImage.naturalHeight - side) / 2;
+      ctx.save();
+      ctx.beginPath(); ctx.arc(player.x, player.y, player.radius, 0, Math.PI * 2); ctx.clip();
+      ctx.drawImage(playerImage, sx, sy, side, side, player.x - player.radius, player.y - player.radius, player.radius * 2, player.radius * 2);
+      ctx.restore();
+      ctx.strokeStyle = player.shield ? '#70f5db' : '#f2d67b';
+      ctx.lineWidth = 4;
+      ctx.beginPath(); ctx.arc(player.x, player.y, player.radius, 0, Math.PI * 2); ctx.stroke();
+    }
     if (player.burn > 0) { ctx.strokeStyle = '#ff4f22'; ctx.lineWidth = 5; ctx.beginPath(); ctx.arc(player.x, player.y, 19, 0, Math.PI * 2); ctx.stroke(); }
   }
   function frame(time) {
